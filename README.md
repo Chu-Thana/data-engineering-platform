@@ -6,13 +6,15 @@
 ![Orchestration](https://img.shields.io/badge/Orchestration-Airflow-purple)
 ![Cloud](https://img.shields.io/badge/Cloud-Future-lightgrey)
 
-A production-style end-to-end data platform that combines batch processing, real-time streaming, API serving, and workflow orchestration.
+A production-style end-to-end data engineering platform that integrates batch processing, real-time streaming, API serving, and workflow orchestration into a unified system.
+This platform demonstrates how modern data systems handle both batch and real-time workloads in a scalable and maintainable way.
 
 ---
 
 # 🧠 System Overview
 
 This platform simulates a **modern data engineering architecture** used in real-world systems.
+This architecture separates concerns across different layers to improve scalability, maintainability, and reliability.
 
 It consists of four main layers:
 
@@ -51,7 +53,7 @@ end
 # 🔄 Data Flow
 
 ### 1️⃣ Streaming Layer (Real-time)
-- Kafka processes incoming events
+- Kafka processes incoming real-time events in a distributed manner
 - Consumer performs:
   - Deduplication (Redis)
   - Aggregation
@@ -112,6 +114,8 @@ This platform demonstrates:
 - API design and caching strategies
 - Workflow orchestration
 - Observability and logging
+- Fault tolerance and retry handling
+- Scalable distributed processing
 
 ---
 
@@ -138,4 +142,4 @@ This project demonstrates how different components of a data platform work toget
 - API-based data serving
 - Workflow orchestration
 
-All designed with a **production mindset**.
+All designed with a production mindset, focusing on scalability, reliability, and real-world data engineering practices.
