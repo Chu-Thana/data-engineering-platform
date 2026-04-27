@@ -1,13 +1,40 @@
 # 🚀 End-to-End Data Engineering Platform
 
+🚀 Reduced API response time by ~27,000x with Redis caching  
+⚡ Designed hybrid batch + streaming data pipelines (Kafka + Airflow)  
+📦 Built a production-style data platform for real-time analytics and API serving
+
 > A production-style data platform that simulates how modern companies build scalable data systems — from ingestion to real-time analytics and API serving.
 
-👉 Batch + Streaming + Orchestration + Warehouse + Serving + BI — unified into one system
+👉 Batch + Streaming + Warehouse + Serving — unified into one platform
 
 ---
 
-💡 This is not just a collection of pipelines.  
-It is a **complete data platform designed with production architecture principles.**
+## 🏗 System Architecture (Production-Style Data Platform)
+
+This project demonstrates how modern data platforms are built in real-world environments by integrating:
+
+👉 Batch Processing + Real-time Streaming + Orchestration + Serving Layer
+
+All pipelines are unified into a single analytics-ready data model, enabling scalable, reliable, and production-ready data workflows.
+
+![Architecture Overview](assets/00_architecture_ultimate_data_platform.png)
+
+💡 This architecture demonstrates how batch and streaming pipelines are unified into a single analytics platform, with Airflow orchestration and API-based data serving.
+
+---
+
+## 📌 Summary
+
+A production-style data platform integrating:
+
+- Batch ETL + Streaming (Kafka)
+- Orchestration (Airflow)
+- Data Warehouse (Redshift)
+- API Serving (FastAPI + Redis)
+- BI Consumption (Power BI)
+
+👉 Designed to deliver scalable, reliable, and real-time analytics
 
 ---
 
@@ -22,39 +49,11 @@ It is a **complete data platform designed with production architecture principle
 
 ---
 
-## ⚙️ Engineering Concepts
-
-![Cache](https://img.shields.io/badge/Cache-Redis-yellow)
-![Data Model](https://img.shields.io/badge/Data_Model-Star_Schema-lightblue)
-![Analytics](https://img.shields.io/badge/Analytics-SQL-blue)
-![Observability](https://img.shields.io/badge/Observability-Logging-grey)
-![Reliability](https://img.shields.io/badge/Reliability-Retry%20%26%20Deduplication-success)
-![Architecture](https://img.shields.io/badge/Architecture-Production_Style-black)
-
----
-
 ### 🎯 Platform Goal
 
 Build a unified data engineering platform that connects:
 
 **Raw Data + Real-time Events → Processing → Warehouse → API Serving → Business Insights**
-
----
-
-## 📌 Summary
-
-This project is a **production-style end-to-end data engineering platform** that demonstrates how modern systems handle both batch and real-time data.
-
-Instead of building isolated components, this platform integrates:
-
-- Batch ETL pipeline (data ingestion → transformation → modeling)
-- Real-time streaming pipeline (Kafka + event processing)
-- Workflow orchestration (Airflow)
-- Data warehouse (Redshift)
-- Serving layer (FastAPI + Redis caching)
-- BI consumption (Power BI)
-
-👉 The goal is not just to move data — but to **serve reliable, scalable, and business-ready insights**
 
 ---
 
@@ -68,18 +67,6 @@ Unlike typical data projects that focus on isolated tools, this platform:
 - Serves data through a **dedicated API layer**, not directly from ETL
 
 👉 This reflects how modern data platforms are built in real-world environments
-
----
-
-## 🏗 System Architecture (Production-Style Data Platform)
-
-This project demonstrates how modern data platforms are built in real-world environments by integrating:
-
-👉 Batch Processing + Real-time Streaming + Orchestration + Serving Layer
-
-All pipelines are unified into a single analytics-ready data model, enabling scalable, reliable, and production-ready data workflows.
-
-![Architecture Overview](assets/00_architecture_ultimate_data_platform.png)
 
 ---
 
