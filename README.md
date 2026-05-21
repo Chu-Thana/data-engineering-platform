@@ -29,7 +29,7 @@ This project demonstrates how modern data platforms are built in real-world envi
 
 All pipelines are unified into a **single analytics-ready data model**
 
-![Architecture](assets/00_architecture_ultimate_data_platform.png)
+![Architecture](assets/00_architecture_ultimate_data_platform.jpg)
 
 💡 This architecture shows how batch and streaming pipelines converge into a unified platform  
 with Airflow orchestration and API-based serving
