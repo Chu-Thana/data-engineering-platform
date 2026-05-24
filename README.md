@@ -11,6 +11,8 @@
 ![Athena](https://img.shields.io/badge/Query-Athena-blue)
 ![FastAPI](https://img.shields.io/badge/API-FastAPI-green)
 ![Redis](https://img.shields.io/badge/Cache-Redis-critical)
+![CI](https://img.shields.io/badge/CI-GitHub_Actions-success)
+![Docker](https://img.shields.io/badge/Container-Docker-blue)
 
 ---
 
@@ -111,6 +113,26 @@ Kafka / CSV
 - Cache-aside pattern  
 - Data lake layering  
 - DAG orchestration  
+
+---
+
+## ⚙️ CI/CD Pipeline
+
+This project includes a CI workflow using GitHub Actions for automated validation and build checks.
+
+### Current CI Features
+- ✅ FastAPI health check
+- ✅ Swagger/OpenAPI docs validation
+- ✅ Docker image build verification
+- ✅ Automated workflow execution on push
+
+### CI Goals
+- Ensure API stability before deployment
+- Prevent broken Docker builds
+- Improve development reliability
+- Simulate production-style engineering workflow
+
+👉 CI/CD workflows are continuously being improved as part of the platform engineering process.
 
 ---
 
