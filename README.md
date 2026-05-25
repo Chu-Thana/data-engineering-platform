@@ -11,7 +11,6 @@
 ![Athena](https://img.shields.io/badge/Query-Athena-blue)
 ![FastAPI](https://img.shields.io/badge/API-FastAPI-green)
 ![Redis](https://img.shields.io/badge/Cache-Redis-critical)
-![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?style=flat&logo=githubactions&logoColor=white)
 ![Container](https://img.shields.io/badge/Container-Docker-2496ED?style=flat&logo=docker&logoColor=white)
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=flat&logo=githubactions&logoColor=white)
 ![Testing](https://img.shields.io/badge/Testing-pytest-0A9EDC?style=flat&logo=pytest&logoColor=white)
@@ -38,6 +37,22 @@ All pipelines are unified into a **single analytics-ready data model**
 
 💡 This architecture shows how batch and streaming pipelines converge into a unified platform  
 with Airflow orchestration and API-based serving
+
+---
+
+## ⚙️ Portfolio CI/CD Overview
+
+This portfolio includes CI/CD practices across all 5 data engineering projects using GitHub Actions.
+
+| Project | CI/CD Scope | Validation |
+|---|---|---|
+| Project 1: Batch ETL | CI | Ruff lint, ETL execution, generated output validation |
+| Project 2: FastAPI Serving Layer | CI/CD | Ruff lint, pytest, Docker build, GHCR publish, AWS EC2 deployment |
+| Project 3: Kafka Streaming | CI | Ruff lint, project structure tests, Docker Compose config validation |
+| Project 4: Airflow Orchestration | CI | Ruff lint, Airflow DAG import validation |
+| Project 5: Cloud Warehouse Platform | CI | Ruff lint, cloud platform structure and asset validation |
+
+👉 This demonstrates production-style engineering practices across batch processing, streaming, orchestration, API serving, and cloud warehouse layers.
 
 ---
 
@@ -119,25 +134,27 @@ Kafka / CSV
 
 ---
 
-## ⚙️ CI/CD Pipeline
+## ⚙️ CI/CD Engineering Practices
 
-This project includes a GitHub Actions CI workflow that runs automatically on every push to the `main` branch.
+This platform applies CI/CD and automated validation across the portfolio to improve reliability, maintainability, and deployment readiness.
 
-The CI pipeline validates the project across three key areas:
+The workflows validate:
 
-- ✅ Code quality checks with Ruff
-- ✅ FastAPI automated tests with pytest
-- ✅ Docker image build validation
+- Code quality with Ruff
+- Automated tests with pytest
+- Batch ETL execution and generated output validation
+- Kafka streaming project structure and Docker Compose configuration
+- Airflow DAG import validation to prevent broken scheduler workflows
+- Docker image build and publishing to GitHub Container Registry
+- FastAPI deployment on AWS EC2 using Docker Compose
 
-This helps ensure that the API remains maintainable, testable, and container-ready before changes are merged or deployed.
+### CI/CD Goals
 
-### CI Goals
-
-- Prevent broken API changes
-- Validate automated test coverage for the serving layer
-- Ensure Docker image build reliability
-- Improve development reliability through automated checks
-- Simulate a production-style engineering workflow
+- Prevent broken code from being merged
+- Validate pipeline behavior before deployment
+- Detect missing dependencies and DAG import errors early
+- Ensure Docker-based services remain buildable and deployable
+- Simulate production-style engineering workflows across the data platform
 
 ---
 
