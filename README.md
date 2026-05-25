@@ -11,11 +11,11 @@
 ![Athena](https://img.shields.io/badge/Query-Athena-blue)
 ![FastAPI](https://img.shields.io/badge/API-FastAPI-green)
 ![Redis](https://img.shields.io/badge/Cache-Redis-critical)
-![CI](https://img.shields.io/badge/CI-GitHub_Actions-success)
-![Docker](https://img.shields.io/badge/Container-Docker-blue)
-![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-brightgreen)
-![Testing](https://img.shields.io/badge/Testing-pytest-blue)
-![Code Quality](https://img.shields.io/badge/Code%20Quality-Ruff-purple)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?style=flat&logo=githubactions&logoColor=white)
+![Container](https://img.shields.io/badge/Container-Docker-2496ED?style=flat&logo=docker&logoColor=white)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=flat&logo=githubactions&logoColor=white)
+![Testing](https://img.shields.io/badge/Testing-pytest-0A9EDC?style=flat&logo=pytest&logoColor=white)
+![Code Quality](https://img.shields.io/badge/Code%20Quality-Ruff-8A2BE2?style=flat)
 
 ---
 
