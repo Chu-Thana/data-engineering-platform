@@ -23,6 +23,7 @@
 This project demonstrates how modern data platforms are built in real-world environments:
 
 👉 This platform integrates 5 individual projects into a unified data system:
+> **Update:** Project 1 has been refactored into a validated vendor payments batch ETL pipeline with data readiness checks, raw-to-silver transformation, gold marts, output validation, sample mode, unit/integration tests, Ruff lint, and GitHub Actions CI.
 - Batch Processing (Project 1)
 - API Serving + Caching (Project 2)
 - Streaming Pipeline (Project 3)
@@ -46,7 +47,7 @@ This portfolio includes CI/CD practices across all 5 data engineering projects u
 
 | Project | CI/CD Scope | Validation |
 |---|---|---|
-| Project 1: Batch ETL | CI | Ruff lint, ETL execution, generated output validation |
+| Project 1: Vendor Payments Batch ETL | CI | Data readiness checks, raw → silver → gold pipeline, output validation, sample mode, unit/integration tests, Ruff lint, GitHub Actions CI |
 | Project 2: FastAPI Serving Layer | CI/CD | Ruff lint, pytest, Docker build, GHCR publish, AWS EC2 deployment |
 | Project 3: Kafka Streaming | CI | Ruff lint, project structure tests, Docker Compose config validation |
 | Project 4: Airflow Orchestration | CI | Ruff lint, Airflow DAG import validation |
