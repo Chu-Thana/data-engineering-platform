@@ -2,7 +2,6 @@
 
 > An end-to-end data engineering portfolio that connects batch ETL, real-time streaming, Airflow orchestration, AWS analytics, FastAPI serving, Power BI, and a reusable web analytics layer.
 
-<<<<<<< HEAD
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Kafka](https://img.shields.io/badge/Streaming-Kafka-orange)
 ![Airflow](https://img.shields.io/badge/Orchestration-Airflow-red)
@@ -10,19 +9,12 @@
 ![S3](https://img.shields.io/badge/Data_Lake-S3-lightgrey)
 ![Redshift](https://img.shields.io/badge/Warehouse-Redshift-darkred)
 ![Athena](https://img.shields.io/badge/Query-Athena-blue)
-![FastAPI](https://img.shields.io/badge/API-FastAPI-green)
-![Redis](https://img.shields.io/badge/Cache-Redis-critical)
+![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)
+![Redis](https://img.shields.io/badge/Cache-Redis-DC382D?logo=redis&logoColor=white)
 ![Container](https://img.shields.io/badge/Container-Docker-2496ED?style=flat&logo=docker&logoColor=white)
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=flat&logo=githubactions&logoColor=white)
 ![Testing](https://img.shields.io/badge/Testing-pytest-0A9EDC?style=flat&logo=pytest&logoColor=white)
 ![Code Quality](https://img.shields.io/badge/Code%20Quality-Ruff-8A2BE2?style=flat)
-=======
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
-![Kafka](https://img.shields.io/badge/Streaming-Kafka-231F20?logo=apachekafka&logoColor=white)
-![Airflow](https://img.shields.io/badge/Orchestration-Airflow-017CEE?logo=apacheairflow&logoColor=white)
-![AWS](https://img.shields.io/badge/Cloud-AWS-232F3E?logo=amazonaws&logoColor=white)
-![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)
-![Redis](https://img.shields.io/badge/Cache-Redis-DC382D?logo=redis&logoColor=white)
 
 ## Platform at a Glance
 
@@ -113,7 +105,6 @@ The result is a portfolio that demonstrates not only pipeline development, but a
 **Serving:** FastAPI, Pydantic, Redis  
 **Quality:** Pytest, validation scripts, CI workflows  
 **Consumption:** Power BI and Web Analytics Application
->>>>>>> 521b963 (Update platform overview and README)
 
 ---
 
@@ -121,23 +112,8 @@ The result is a portfolio that demonstrates not only pipeline development, but a
 
 The next phase extends the trusted analytics datasets and FastAPI endpoints into:
 
-<<<<<<< HEAD
-👉 This platform integrates 5 individual projects into a unified data system:
-> **Update:** Project 1 has been refactored into a validated vendor payments batch ETL pipeline with data readiness checks, raw-to-silver transformation, gold marts, output validation, sample mode, unit/integration tests, Ruff lint, and GitHub Actions CI.
-- Batch Processing (Project 1)
-- API Serving + Caching (Project 2)
-- Streaming Pipeline (Project 3)
-- Orchestration (Project 4)
-- Cloud Data Warehouse (Project 5)
-
-👉 Batch Processing + Real-time Streaming + Orchestration + Serving Layer  
-
-All pipelines are unified into a **single analytics-ready data model**
-
-![Architecture](assets/00_architecture_ultimate_data_platform.jpg)
-
-💡 This architecture shows how batch and streaming pipelines converge into a unified platform  
-with Airflow orchestration and API-based serving
+- Power BI dashboards for business reporting and KPI monitoring
+- A web analytics application built on the same reusable API layer
 
 ---
 
@@ -270,7 +246,4 @@ Most portfolios demonstrate tools.
 ## 🔥 Final Thought
 
 👉 This is a **complete Data Platform**
-=======
-- Power BI dashboards for business reporting and KPI monitoring
-- A web analytics application built on the same reusable API layer
->>>>>>> 521b963 (Update platform overview and README)
+
