@@ -30,8 +30,8 @@ An end-to-end data engineering portfolio that connects Batch ETL, Streaming, Air
 | Duplicate or missing event IDs in warehouse validation | 0 |
 | Airflow orchestration | 3 DAGs, 12 tasks in the main platform workflow |
 | Main Airflow workflow runtime | 16 minutes 36 seconds |
-| API cache validation | Cache MISS 2.65 ms → Cache HIT 0.96 ms |
-| Cached response improvement | ~2.8× faster in the captured local run |
+| API cache validation | Cache MISS 7,076.46 ms → Cache HIT 0.58 ms |
+| Cached response improvement | ~12,200× faster with 99.99% latency reduction |
 | Total Redshift analytics views | 9 |
 | Analytics dashboards delivered | 3 |
 
@@ -129,7 +129,7 @@ Each repository owns a focused platform responsibility and includes architecture
 | Project | Responsibility | Engineering focus |
 |---|---|---|
 | [**Project 1 — Batch ETL Pipeline**](https://github.com/Chu-Thana/vendor-payments-etl-analytics) | Raw → Silver → Gold processing | Data cleaning, validation, aggregation, analytics marts, and reproducible Batch outputs |
-| [**Project 2 — API Serving Layer**](https://github.com/Chu-Thana/vendor-payments-api-serving) | FastAPI analytics service | Typed contracts, service and repository layers, middleware, Redis caching, tests, and public deployment |
+| [**Project 2 — API Serving Layer**](https://github.com/Chu-Thana/vendor-payments-api-serving) | FastAPI analytics service | Typed contracts, service and repository layers, middleware, in-memory cache-aside caching, tests, and public deployment |
 | [**Project 3 — Streaming Pipeline**](https://github.com/Chu-Thana/vendor-payments-streaming-pipeline) | Event processing | Kafka-style ingestion, schema validation, deduplication, curated outputs, and execution metrics |
 | [**Project 4 — Airflow Orchestration**](https://github.com/Chu-Thana/vendor-payments-airflow-orchestration) | Cross-project workflow coordination | DAG design, dependencies, retries, metadata validation, and operational summaries |
 | [**Project 5 — Cloud Data Platform**](https://github.com/Chu-Thana/vendor-payments-cloud-data-platform) | Cloud and warehouse analytics | Amazon S3, Athena, Glue Data Catalog, Redshift Serverless, analytics views, and runtime metadata |
@@ -179,7 +179,7 @@ The design keeps transformation, orchestration, cloud processing, serving, and p
 
 - Exposed Batch and Streaming analytics through FastAPI
 - Applied Pydantic response contracts and layered service/repository design
-- Reduced repeated-request response time from **11.6 seconds to 0.42 seconds** with cache-aside caching
+- Reduced repeated Streaming Summary response time from **7,076.46 ms to 0.58 ms** through cache-aside caching—approximately **12,200× faster**
 - Passed **57 automated tests** after deployment-summary integration
 - Deployed publicly on Render and connected to the Vercel application
 
@@ -224,7 +224,7 @@ The portfolio is designed around practical data-engineering patterns rather than
 | Orchestration | Apache Airflow |
 | Cloud storage and query | Amazon S3, AWS Glue Data Catalog, Amazon Athena |
 | Warehouse | Amazon Redshift Serverless |
-| API serving | FastAPI, Pydantic, Redis, Uvicorn |
+| API serving | FastAPI, Pydantic, in-memory caching, Uvicorn |
 | Business intelligence | Power BI |
 | Web analytics | React, TypeScript, Vite, Recharts |
 | Deployment | Render, Vercel, Docker, Docker Compose |
