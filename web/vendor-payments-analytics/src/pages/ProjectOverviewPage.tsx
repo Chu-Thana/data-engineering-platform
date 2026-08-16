@@ -47,13 +47,13 @@ description:
 icon: Cloud,
 title: 'Cloud Analytics Platform',
 description:
-'Publishes trusted datasets to Amazon S3, Athena, AWS Glue, and Redshift Serverless analytics layers.',
+'Publishes trusted Batch and Streaming datasets to Amazon S3 and Redshift Serverless for downstream analytics and validation.',
 },
 {
 icon: Server,
 title: 'Analytics Consumption',
 description:
-'Serves reusable Batch and Streaming analytics through FastAPI to Power BI dashboards and this React application.',
+  'Serves reusable Batch and Streaming analytics through FastAPI for downstream applications, including this React analytics application.',
 },
 ]
 
@@ -195,8 +195,8 @@ return ( <div className="overview-page"> <section className="hero-section"> <div
 
       <p>
         The architecture connects trusted Batch and Streaming processing
-        with Airflow orchestration, AWS cloud analytics, a reusable FastAPI
-        serving layer, and two analytics consumption experiences.
+        with Airflow orchestration, Amazon S3 and Redshift Serverless,
+        a reusable FastAPI serving layer, and downstream analytics applications.
       </p>
     </div>
 
@@ -319,8 +319,9 @@ return ( <div className="overview-page"> <section className="hero-section"> <div
         duplicating their processing responsibilities.
       </li>
       <li>
-        Reusable FastAPI endpoints support both Power BI dashboards and a
-        React analytics application.
+        Reusable FastAPI endpoints provide Batch and Streaming analytics
+        to the React analytics application while keeping the serving layer
+        independent from the underlying S3 data source.
       </li>
     </ul>
   </section>
