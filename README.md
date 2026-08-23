@@ -15,7 +15,7 @@ An end-to-end data engineering portfolio that connects Batch ETL, Streaming, Air
 
 **Built independently by Thanaseth Chuachan, a Data Engineer candidate with a Mathematics background.**
 
-[**Live Analytics Application**](https://vendor-payments-analytics.vercel.app) · [**FastAPI Documentation**](https://vendor-payments-api-serving.onrender.com/docs) · [**Explore the Projects**](#explore-the-projects)
+[**Live Analytics Application**](https://vendor-payments-analytics.vercel.app) · [**FastAPI Documentation**](https://vendor-payments-api-render.onrender.com/docs) · [**Explore the Repositories**](#explore-the-repositories)
 
 ---
 
@@ -23,13 +23,13 @@ An end-to-end data engineering portfolio that connects Batch ETL, Streaming, Air
 
 | Metric | Validated result |
 |---|---:|
-| Integrated data engineering projects | 5 |
+| Platform repositories / components | 6 |
 | Batch records processed | 3.35M+ |
 | Validated Streaming events | 100,000 |
 | Distinct Streaming event IDs | 100,000 |
 | Duplicate or missing event IDs in warehouse validation | 0 |
-| Airflow orchestration | 3 DAGs, 12 tasks in the main platform workflow |
-| Main Airflow workflow runtime | 16 minutes 36 seconds |
+| Main Airflow workflow | 25 tasks |
+| Main Airflow workflow runtime | 1,160.74 seconds |
 | API cache validation | Cache MISS 7,076.46 ms → Cache HIT 0.58 ms |
 | Cached response improvement | ~12,200× faster with 99.99% latency reduction |
 | Total Redshift analytics views | 9 |
@@ -46,25 +46,27 @@ An end-to-end data engineering portfolio that connects Batch ETL, Streaming, Air
 The platform separates processing responsibilities while keeping the complete delivery path traceable:
 
 ```text
-Batch ETL + Streaming Processing
-            ↓
-     Airflow Orchestration
-            ↓
-Amazon S3 + Athena + Redshift
-            ↓
-     FastAPI Serving Layer
-            ↓
- Power BI + React Web Analytics
+                         Apache Airflow
+                    orchestrates & validates
+                         ⋮             ⋮
+                         ↓             ↓
+
+Batch ETL + Kafka Streaming ─────→ Cloud Data Platform
+                                      │
+                                      ↓
+                               FastAPI Serving
+                                  ↙         ↘
+                           Power BI        React Web
 ```
 
 ### Responsibility Boundaries
 
 - **Batch ETL Pipeline** owns Raw → Silver → Gold transformation, validation, and analytics marts.
-- **Streaming Pipeline** owns event ingestion, validation, deduplication, and curated outputs.
-- **Airflow Orchestration** coordinates execution, dependencies, retries, and metadata validation.
+- **Kafka Streaming Pipeline** owns Producer → Kafka → Consumer processing, schema validation, Redis-backed deduplication, accepted-event staging, and execution metrics.
+- **Airflow Orchestration** owns execution order, dependency coordination, Batch execution, downstream Streaming validation, JSONL → CSV conversion, S3/Redshift orchestration, and execution summaries.
 - **Cloud Data Platform** owns S3 publishing, Athena definitions, Redshift loading, analytics views, and runtime metadata.
 - **API Serving Layer** exposes validated Batch and Streaming analytics through reusable contracts.
-- **Power BI and React** consume the same trusted analytics outputs for business reporting and interactive exploration.
+- **Power BI and React** consume the FastAPI serving layer for business reporting and interactive exploration.
 
 ---
 
@@ -73,7 +75,7 @@ Amazon S3 + Athena + Redshift
 The deployed React application consumes the public FastAPI service and presents the final analytics consumption layer of the platform.
 
 **Live application:** https://vendor-payments-analytics.vercel.app  
-**API documentation:** https://vendor-payments-api-serving.onrender.com/docs
+**API documentation:** https://vendor-payments-api-render.onrender.com/docs
 
 ### Project Overview
 
@@ -104,7 +106,7 @@ The application demonstrates:
 
 ## Power BI Dashboards
 
-Three Power BI dashboards provide a second analytics-consumption path over the same trusted project outputs.
+Three Power BI dashboards provide a second analytics-consumption path through the Web API connector.
 
 ### Executive Overview Dashboard
 
@@ -122,17 +124,18 @@ This dual-consumption design demonstrates that the platform can serve both conve
 
 ---
 
-## Explore the Projects
+## Explore the Repositories
 
 Each repository owns a focused platform responsibility and includes architecture documentation, implementation details, automated validation, runtime metadata, and execution evidence.
 
-| Project | Responsibility | Engineering focus |
+| Repository | Responsibility | Engineering focus |
 |---|---|---|
-| [**Project 1 — Batch ETL Pipeline**](https://github.com/Chu-Thana/vendor-payments-etl-analytics) | Raw → Silver → Gold processing | Data cleaning, validation, aggregation, analytics marts, and reproducible Batch outputs |
-| [**Project 2 — API Serving Layer**](https://github.com/Chu-Thana/vendor-payments-api-serving) | FastAPI analytics service | Typed contracts, service and repository layers, middleware, in-memory cache-aside caching, tests, and public deployment |
-| [**Project 3 — Streaming Pipeline**](https://github.com/Chu-Thana/vendor-payments-streaming-pipeline) | Event processing | Kafka-style ingestion, schema validation, deduplication, curated outputs, and execution metrics |
-| [**Project 4 — Airflow Orchestration**](https://github.com/Chu-Thana/vendor-payments-airflow-orchestration) | Cross-project workflow coordination | DAG design, dependencies, retries, metadata validation, and operational summaries |
-| [**Project 5 — Cloud Data Platform**](https://github.com/Chu-Thana/vendor-payments-cloud-data-platform) | Cloud and warehouse analytics | Amazon S3, Athena, Glue Data Catalog, Redshift Serverless, analytics views, and runtime metadata |
+| [**vendor-payments-etl-analytics**](https://github.com/Chu-Thana/vendor-payments-etl-analytics) | Batch ETL and analytics processing | Raw → Silver → Gold, chunk processing, deterministic keys, quality flags, validation, Gold marts |
+| [**vendor-payments-streaming-pipeline**](https://github.com/Chu-Thana/vendor-payments-streaming-pipeline) | Kafka event processing | Producer, Kafka topic, Consumer, Redis deduplication, staging JSONL, alerts, execution metrics |
+| [**vendor-payments-airflow-orchestration**](https://github.com/Chu-Thana/vendor-payments-airflow-orchestration) | Workflow orchestration | DAG dependencies, Batch execution, Streaming downstream validation, S3/Redshift orchestration, summaries |
+| [**vendor-payments-cloud-data-platform**](https://github.com/Chu-Thana/vendor-payments-cloud-data-platform) | Cloud and warehouse analytics | Amazon S3, Athena, Redshift Serverless, landing tables, analytics views, warehouse validation |
+| [**vendor-payments-api-serving**](https://github.com/Chu-Thana/vendor-payments-api-serving) | FastAPI analytics service | Typed contracts, service/repository layers, middleware, cache-aside responses, Docker, Render deployment |
+| [**vendor-payments-analytics**](https://github.com/Chu-Thana/vendor-payments-analytics) | Analytics consumption | React + TypeScript web analytics, Power BI, reusable API-driven views |
 
 ---
 
@@ -145,14 +148,27 @@ Vendor payment source data
 │   └── Raw → Silver → Gold → analytics marts
 │
 └── Streaming path
-    └── Events → validation → deduplication → curated output
+    └── Producer → Kafka → Consumer
+        → validation → Redis deduplication
+        → validated staging JSONL
 
-Validated Batch and Streaming outputs
-→ Airflow-coordinated execution
-→ Amazon S3 data lake
-→ Amazon Athena and Redshift Serverless
-→ FastAPI analytics contracts
-→ Power BI dashboards and React web analytics
+Apache Airflow
+→ runs and validates Batch processing
+→ validates Streaming staging outputs
+→ converts Streaming JSONL → curated CSV
+→ coordinates S3 publishing and Redshift processing
+
+Amazon S3
+├──→ Amazon Athena
+│    └── direct serverless SQL over curated S3 datasets
+│
+└──→ Amazon Redshift Serverless
+     └── landing tables → analytics views → warehouse validation
+
+Trusted analytics
+→ FastAPI contracts
+├──→ Power BI dashboards
+└──→ React web analytics
 ```
 
 The design keeps transformation, orchestration, cloud processing, serving, and presentation in separate modules with explicit interfaces between them.
@@ -167,13 +183,15 @@ The design keeps transformation, orchestration, cloud processing, serving, and p
 - Applied Raw → Silver → Gold data layering
 - Produced business-ready fiscal-year, department, supplier, pending-payment, and fund-category marts
 - Added validation checkpoints and generated execution metadata
+- Passed **20 automated tests** with Ruff validation
 
 ### Streaming Processing
 
-- Processed and validated **100,000 payment events**
+- Accepted and validated **100,000 unique payment events**
 - Preserved **100,000 distinct event IDs** after cloud and warehouse loading
 - Validated **0 duplicate** and **0 missing event IDs** in Redshift
-- Produced event-level and aggregate outputs for downstream analytics
+- Produced validated staging JSONL for downstream orchestration
+- Passed **47 automated tests** with Ruff validation and CI
 
 ### API Serving
 
@@ -186,14 +204,15 @@ The design keeps transformation, orchestration, cloud processing, serving, and p
 ### Cloud Analytics
 
 - Published trusted Batch and Streaming outputs to Amazon S3
-- Defined Athena external tables through AWS Glue Data Catalog
+- Queried curated S3 data through Amazon Athena
 - Loaded **5 Batch landing tables** and **1 Streaming landing table** into Redshift Serverless
 - Created **9 analytics views** across Batch and Streaming workloads
 - Generated and validated machine-readable Redshift runtime metadata
+- Passed **34 automated tests** with Ruff validation and CI
 
 ### Orchestration and Quality
 
-- Coordinated platform workflows through **4 Airflow DAGs with 11+ tasks**
+- Coordinated the main platform workflow through **25 Airflow tasks**
 - Applied Ruff, pytest, GitHub Actions, Docker, and Docker Compose across the portfolio
 - Kept generated data, secrets, and local runtime files outside source control
 - Stored execution evidence alongside the component that owns each responsibility
@@ -220,9 +239,9 @@ The portfolio is designed around practical data-engineering patterns rather than
 | Layer | Technologies |
 |---|---|
 | Data processing | Python, Pandas, SQL |
-| Streaming | Kafka-style producer and consumer workflows, Redis |
+| Streaming | Apache Kafka, Redis |
 | Orchestration | Apache Airflow |
-| Cloud storage and query | Amazon S3, AWS Glue Data Catalog, Amazon Athena |
+| Cloud storage and query | Amazon S3, Amazon Athena |
 | Warehouse | Amazon Redshift Serverless |
 | API serving | FastAPI, Pydantic, in-memory caching, Uvicorn |
 | Business intelligence | Power BI |
@@ -234,7 +253,7 @@ The portfolio is designed around practical data-engineering patterns rather than
 
 ## Validation and CI/CD
 
-Automated validation is implemented across all five projects.
+Automated validation is implemented across the platform repositories.
 
 | Project | Automated validation |
 |---|---|
@@ -243,6 +262,7 @@ Automated validation is implemented across all five projects.
 | Streaming | Project structure, event processing, output validation, Docker Compose configuration |
 | Airflow | DAG imports, project structure, cross-project metadata, orchestration outputs |
 | Cloud Platform | S3 plans, Athena SQL assets, Redshift metrics, event-ID integrity, metadata contracts, CI |
+| Analytics | Frontend build and API-driven analytics consumption |
 
 The validation strategy is designed to detect broken code, missing assets, invalid metadata, incompatible response contracts, and deployment regressions before downstream consumption.
 
@@ -278,7 +298,7 @@ data-engineering-platform/
 └── README.md
 ```
 
-The five component implementations remain in their dedicated repositories, while this repository presents the integrated architecture and final analytics-consumption layer.
+The core component implementations remain in their dedicated repositories, while this repository presents the integrated architecture and final analytics-consumption layer.
 
 ---
 
@@ -327,10 +347,10 @@ Web application
 https://vendor-payments-analytics.vercel.app
 
 FastAPI documentation
-https://vendor-payments-api-serving.onrender.com/docs
+https://vendor-payments-api-render.onrender.com/docs
 ```
 
-The frontend is deployed through Vercel and reads the public API base URL from `VITE_API_BASE_URL`. The backend is deployed through Render with explicit CORS configuration for local development and the production Vercel origin.
+The frontend is deployed through Vercel and reads the public API base URL from `VITE_API_BASE_URL`. The backend is containerized and deployed through Render with explicit CORS configuration for local development and the production Vercel origin.
 
 The Render free instance may require a short cold start after inactivity before the first API-backed page finishes loading.
 
@@ -358,3 +378,4 @@ The result demonstrates data pipeline development, system design, data quality, 
 This is not a collection of disconnected tool demos.
 
 It is a modular data platform in which each project owns a clear responsibility, publishes validated outputs, and contributes to a deployed analytics experience that can be opened and reviewed end to end.
+
