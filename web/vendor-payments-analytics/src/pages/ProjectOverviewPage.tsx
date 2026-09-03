@@ -47,7 +47,7 @@ description:
 icon: Cloud,
 title: 'Cloud Analytics Platform',
 description:
-'Publishes trusted Batch and Streaming datasets to Amazon S3 and Redshift Serverless for downstream analytics and validation.',
+'Publishes trusted Batch and per-window Streaming datasets to Amazon S3, validates S3 and Redshift metrics through Athena, and exposes trusted warehouse analytics.',
 },
 {
 icon: Server,
@@ -194,16 +194,16 @@ return ( <div className="overview-page"> <section className="hero-section"> <div
       <h2>Five integrated projects, one analytics platform</h2>
 
       <p>
-        The architecture connects trusted Batch and Streaming processing
-        with Airflow orchestration, Amazon S3 and Redshift Serverless,
+        The architecture connects independent Batch and Streaming pipelines
+        with Airflow orchestration, Amazon S3, Athena, and Redshift Serverless,
         a reusable FastAPI serving layer, and downstream analytics applications.
-      </p>
+       </p>
     </div>
 
     <figure className="architecture-card">
       <img
         src="/images/00_vendor-payments-data-platform-overview.png"
-        alt="Vendor Payments Data Platform architecture showing Airflow orchestration, Batch and Streaming processing, AWS cloud analytics, FastAPI serving, Power BI dashboards, and the Web Analytics Application."
+        alt="Vendor Payments Data Platform architecture showing independent Batch and Streaming pipelines, Airflow orchestration, AWS S3, Athena and Redshift analytics, FastAPI serving, Power BI dashboards, and the React Web Analytics Application."
       />
 
       <figcaption>
