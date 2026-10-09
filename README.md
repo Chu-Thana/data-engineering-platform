@@ -11,7 +11,7 @@
 ![Testing](https://img.shields.io/badge/Testing-pytest-0A9EDC?logo=pytest&logoColor=white)
 ![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
 
-An end-to-end data engineering portfolio connecting Batch ETL, bounded-window Streaming, Airflow orchestration, AWS cloud analytics, FastAPI serving, Power BI, and a deployed React analytics application.
+An end-to-end data engineering portfolio connecting recovery-aware Batch ETL, bounded-window Streaming, Airflow orchestration, PostgreSQL recovery metadata, AWS cloud analytics, FastAPI serving, Power BI, and a deployed React analytics application.
 
 **Built independently by Thanaseth Chuachan, a Data Engineer candidate with a Mathematics background.**
 
@@ -25,6 +25,7 @@ An end-to-end data engineering portfolio connecting Batch ETL, bounded-window St
 | --- | ---: |
 | Batch records processed | 3,354,965 |
 | Batch processing chunks | 34 |
+| Batch chunk size | 100,000 rows |
 | Validated Gold marts | 5 |
 | Streaming windows prepared | 3 |
 | Accepted Streaming events per window | 100,000 |
@@ -33,7 +34,9 @@ An end-to-end data engineering portfolio connecting Batch ETL, bounded-window St
 | Duplicate Streaming event IDs in warehouse | 0 |
 | Missing Streaming event IDs in warehouse | 0 |
 | Redshift analytics views | 9 |
-| Batch cross-layer validation | PASS |
+| Batch summary cross-layer validation | PASS |
+| Batch grouped cross-layer validation | PASS |
+| Batch grouped validation rows | 108 |
 | Streaming cross-layer validation | PASS |
 | Analytics dashboards | 3 |
 
@@ -49,15 +52,19 @@ The current architecture keeps Batch and Streaming lifecycles independent while 
 
 ```text
 Batch ETL
+→ PostgreSQL Recovery Metadata
 → Batch Airflow
 → Batch Cloud Processing
 → S3 / Athena / Redshift
+→ Summary + Grouped Validation
                      ↘
-                      FastAPI
+                       FastAPI
                      ↗
 Streaming
-→ Streaming Airflow
-→ Streaming Cloud Processing
+→ 3 bounded windows
+→ Producer → Kafka → Consumer
+→ Redis deduplication
+→ Streaming Airflow automation
 → per-window S3 / Athena / Redshift
 → latest.json
 
@@ -66,7 +73,7 @@ Batch Pipeline DAG ───────┐
 Streaming Pipeline DAG ───┘
                           → status checks
                           → cloud readiness
-                          → Redshift summary
+                          → Redshift execution summary
                           → orchestration summary
 
 FastAPI
@@ -76,11 +83,12 @@ FastAPI
 
 ### Responsibility Boundaries
 
-- **Batch ETL Pipeline** owns Raw → Silver → Gold transformation, data-quality flags, Silver validation, Gold mart generation, and runtime metadata.
+- **Batch ETL Pipeline** owns Raw → Silver → Gold transformation, candidate-first publishing, data-quality flags, validation gates, Gold mart generation, and chunk-aware processing.
+- **PostgreSQL Recovery Database** owns pipeline-run metadata, stage execution tracking, chunk-level recovery state, stale execution recovery, and persisted lifecycle metadata.
 - **Streaming Pipeline** owns bounded-window preparation, Producer → Kafka → Consumer processing, Redis deduplication, per-window staging, `_SUCCESS` completion markers, and execution metrics.
-- **Batch Pipeline DAG** runs the full Batch ETL lifecycle, validates outputs, uploads Gold data, loads Redshift, and performs Athena ↔ Redshift validation.
-- **Streaming Pipeline DAG** discovers one completed bounded window, processes curated output, loads cloud analytics, validates Athena ↔ Redshift metrics, publishes `latest.json`, and marks the window processed.
-- **Main Orchestration DAG** checks Batch and Streaming pipeline status, checks cloud readiness, generates Redshift execution metadata, validates the summary, and publishes orchestration metadata.
+- **Batch Pipeline DAG** runs the full Batch lifecycle, checks recovery state, validates Silver / Gold, uploads Gold data, loads Redshift, and performs summary plus grouped Athena ↔ Redshift validation.
+- **Streaming Pipeline DAG** discovers the next window, runs Producer and Consumer, verifies `_SUCCESS`, processes cloud analytics, publishes `latest.json`, marks `_PROCESSED`, and self-triggers the next window.
+- **Main Orchestration DAG** checks Batch and Streaming status, checks cloud readiness, generates Redshift execution metadata, validates the summary, and publishes orchestration metadata.
 - **Cloud Data Platform** owns S3 publishing, Athena query assets, Redshift landing / analytics objects, cross-layer validation, runtime metadata, and the latest Streaming pointer.
 - **API Serving Layer** exposes Batch and Streaming analytics through stable contracts and dynamically resolves the latest completed Streaming window.
 - **React and Power BI** consume the FastAPI serving layer for interactive and business analytics.
@@ -89,16 +97,17 @@ FastAPI
 
 ## Batch ETL Pipeline
 
-The Batch path processes the full Vendor Payments source through a validated Raw → Silver → Gold workflow.
+The Batch path processes the full Vendor Payments source through a validated Raw → Silver → Gold workflow with candidate-first publishing and recovery-aware chunk processing.
 
 ```text
 Raw
-→ Data Readiness
-→ Silver Transformation
-→ Silver Validation
-→ Gold Mart Build
-→ Gold Validation
-→ Runtime Metadata
+→ Silver Candidate Build
+→ Silver Validation Gate
+→ Publish Trusted Silver
+→ Gold Candidate Build
+→ Gold Validation Gate
+→ Publish Trusted Gold
+→ Recovery Metadata
 ```
 
 Latest validated execution:
@@ -107,12 +116,33 @@ Latest validated execution:
 Source rows         = 3,354,965
 Silver rows         = 3,354,965
 Chunks              = 34
+Chunk size          = 100,000
 Silver columns      = 49
 Row-hash uniqueness = 100%
 Gold marts          = 5 / 5 PASS
 ```
 
 The validated Silver dataset is also the source used to prepare deterministic Streaming windows, while Batch and Streaming processing remain separate lifecycles.
+
+---
+
+## PostgreSQL Recovery Database
+
+The Recovery Database stores operational execution state rather than business analytics data.
+
+It tracks:
+
+```text
+pipeline runs
+stage executions
+attempt numbers
+chunk metadata
+chunk status
+recovery state
+stale-running executions
+```
+
+The Batch pipeline uses this metadata to detect prior completed work, avoid unnecessary reprocessing, recover stale executions, and persist stage-level and chunk-level state across reruns.
 
 ---
 
@@ -129,9 +159,9 @@ stream_window_003
 Each window contains:
 
 ```text
-100,000 source events
-+ 5,000 replay / duplicate events
-= 105,000 attempted Kafka messages
+100,000 base events
++ 5,000 controlled duplicate events
+= 105,000 attempted data events
 ```
 
 Validated producer / consumer behavior per window:
@@ -159,25 +189,38 @@ The platform now uses three DAGs with separate responsibilities.
 ### Batch Pipeline DAG
 
 ```text
-Run full Batch ETL
+Check Recovery DB
+→ Run Silver / Gold pipeline
 → Validate Silver / Gold
 → Upload Gold to S3
 → Load Batch data to Redshift
-→ Validate analytics
-→ Athena ↔ Redshift cross-layer validation
+→ Summary Athena ↔ Redshift validation
+→ Grouped Athena ↔ Redshift validation
 ```
 
 ### Streaming Pipeline DAG
 
 ```text
-Discover _SUCCESS window
-→ Ignore _PROCESSED windows
-→ Process one bounded window
+Discover next window
+→ Run Producer
+→ Run Consumer
+→ Verify _SUCCESS
+→ Extract / transform curated data
 → Upload curated output to S3
 → Load Redshift
-→ Athena ↔ Redshift cross-layer validation
+→ Athena ↔ Redshift validation
 → Publish latest.json
 → Create _PROCESSED
+→ Trigger next window
+```
+
+This creates an automated progression:
+
+```text
+stream_window_001
+→ stream_window_002
+→ stream_window_003
+→ complete
 ```
 
 ### Main Orchestration DAG
@@ -185,13 +228,13 @@ Discover _SUCCESS window
 ```text
 Check Batch pipeline status
 Check Streaming pipeline status
-→ Check cloud readiness
-→ Generate Redshift summary
-→ Validate execution summary
+→ Check cloud platform readiness
+→ Generate Redshift execution summary
+→ Validate Redshift execution summary
 → Generate orchestration summary
 ```
 
-The Main DAG does not rerun both pipelines. It verifies the latest successful independent states and summarizes platform readiness.
+The Main DAG does not rerun both pipelines. It verifies the latest successful independent states and summarizes platform readiness. Final local integration validation completed successfully across all three DAGs.
 
 ---
 
@@ -207,7 +250,9 @@ Validated Gold marts
 ├──→ Amazon Athena
 └──→ Amazon Redshift
         ↓
-Athena ↔ Redshift validation
+Summary cross-layer validation
+        ↓
+Grouped cross-layer validation
 ```
 
 ### Streaming
@@ -236,9 +281,12 @@ Latest verified Streaming pointer:
 Latest cross-layer results:
 
 ```text
-Batch cross-layer validation     = PASS
-Streaming cross-layer validation = PASS
+Batch summary cross-layer validation = PASS
+Batch grouped cross-layer validation = PASS
+Streaming cross-layer validation     = PASS
 ```
+
+Batch summary validation includes `row_count`, `source_record_count`, `total_vouchers_paid`, `total_vouchers_pending`, and `total_encumbrance_balance`. Grouped validation compares `fiscal_year`, `department`, and `fund_category`; the final Athena and Redshift grouped result sets both contain 108 rows.
 
 The warehouse currently exposes **5 Batch analytics views + 4 Streaming analytics views = 9 Redshift analytics views**.
 
@@ -368,10 +416,11 @@ This dual-consumption design allows React and Power BI to reuse the same serving
 
 | Repository | Responsibility | Engineering focus |
 | --- | --- | --- |
-| [**vendor-payments-etl-analytics**](https://github.com/Chu-Thana/vendor-payments-etl-analytics) | Batch ETL | Raw → Silver → Gold, chunk processing, deterministic keys, quality flags, validation, Gold marts |
+| [**vendor-payments-etl-analytics**](https://github.com/Chu-Thana/vendor-payments-etl-analytics) | Batch ETL | Raw → Silver → Gold, 100K-row chunks, candidate-first publishing, validation gates, recovery-aware execution, Gold marts |
 | [**vendor-payments-streaming-pipeline**](https://github.com/Chu-Thana/vendor-payments-streaming-pipeline) | Kafka Streaming | bounded windows, Producer, Kafka, Consumer, Redis deduplication, staging, completion markers |
-| [**vendor-payments-airflow-orchestration**](https://github.com/Chu-Thana/vendor-payments-airflow-orchestration) | Workflow orchestration | Batch DAG, Streaming DAG, Main Orchestration DAG, cross-layer execution control |
-| [**vendor-payments-cloud-data-platform**](https://github.com/Chu-Thana/vendor-payments-cloud-data-platform) | AWS cloud analytics | S3, Athena, Redshift Serverless, cross-layer validation, runtime metadata, `latest.json` |
+| [**vendor-payments-airflow-orchestration**](https://github.com/Chu-Thana/vendor-payments-airflow-orchestration) | Workflow orchestration | Batch DAG, automated Streaming DAG, Main Orchestration DAG, execution control |
+| [**vendor-payments-cloud-data-platform**](https://github.com/Chu-Thana/vendor-payments-cloud-data-platform) | AWS cloud analytics | S3, Athena, Redshift Serverless, summary + grouped validation, runtime metadata, `latest.json` |
+| **vendor-payments-database** | Recovery metadata | PostgreSQL pipeline runs, stage execution tracking, chunk recovery state, stale-run recovery |
 | [**vendor-payments-api-serving**](https://github.com/Chu-Thana/vendor-payments-api-serving) | API serving | FastAPI, repository/service layers, latest-window resolution, caching, Docker, Render |
 | [**data-engineering-platform**](https://github.com/Chu-Thana/data-engineering-platform) | Final analytics platform | React + TypeScript web analytics, Power BI, integrated architecture and portfolio documentation |
 
@@ -383,12 +432,15 @@ This dual-consumption design allows React and Power BI to reuse the same serving
 Vendor Payments source
 │
 ├── Batch
-│   └── Raw → Silver → Gold
+│   └── Raw → Silver Candidate → Validate → Publish Silver
+│       → Gold Candidate → Validate → Publish Gold
+│       → PostgreSQL Recovery Metadata
 │       → Batch Pipeline DAG
 │       → S3 / Athena / Redshift
+│       → Summary + Grouped Validation
 │
 └── Streaming
-    └── Silver → bounded windows
+    └── Silver → 3 bounded windows
         → Producer → Kafka → Consumer
         → Redis deduplication
         → _SUCCESS
@@ -396,6 +448,8 @@ Vendor Payments source
         → per-window S3 / Athena / Redshift
         → cross-layer validation
         → latest.json
+        → _PROCESSED
+        → trigger next window
 
 Batch Pipeline DAG ───────┐
                           ├→ Main Orchestration DAG
@@ -419,6 +473,8 @@ Trusted cloud outputs
 - Validated **49 Silver columns**
 - Achieved **100% source-row-hash uniqueness**
 - Produced **5 validated Gold marts**
+- Added candidate-first Silver / Gold publishing
+- Added chunk-level Recovery metadata and stale-run recovery
 - Passed **20 automated tests** and Ruff validation
 
 ### Streaming
@@ -430,15 +486,27 @@ Trusted cloud outputs
 - Used Consumer manual offset commits
 - Used Redis TTL deduplication
 - Added per-window staging, `_SUCCESS`, and `_PROCESSED`
+- Automated window progression through Airflow
 - Passed **51 automated tests** and Ruff validation
 
 ### Airflow
 
 - Split Batch and Streaming into independent pipeline DAGs
+- Automated Streaming Producer / Consumer execution
+- Added self-triggered next-window progression
 - Added a Main Orchestration DAG for status and platform summaries
-- Added Batch and Streaming Athena ↔ Redshift validation
+- Added Batch summary and grouped Athena ↔ Redshift validation
 - Published `latest.json` only after Streaming validation
 - Passed **17 container-based automated tests** and Ruff validation
+- Completed final local integration successfully across all three DAGs
+
+### Recovery Database
+
+- Added PostgreSQL pipeline-run metadata
+- Added stage execution tracking
+- Added chunk-level recovery state
+- Added stale execution recovery
+- Extended recovery tracking through grouped cross-layer validation
 
 ### Cloud
 
@@ -446,6 +514,9 @@ Trusted cloud outputs
 - Added Athena as an independent S3 validation layer
 - Loaded **5 Batch landing tables** and **1 Streaming landing table**
 - Created **9 Redshift analytics views**
+- Added summary validation for `total_encumbrance_balance`
+- Added grouped validation by fiscal year, department, and fund category
+- Validated **108 grouped rows** across Athena and Redshift
 - Validated **0 duplicate** and **0 missing** Streaming event IDs in the warehouse
 - Passed **34 automated tests** and Ruff validation
 
@@ -453,6 +524,7 @@ Trusted cloud outputs
 
 - Exposed Batch and Streaming analytics through FastAPI
 - Dynamically resolves the latest completed Streaming window
+- Streams S3 event data without loading the full dataset into memory
 - Uses typed response contracts, middleware observability, and cache-aside behavior
 - Passed **57 automated tests**
 - CI/CD validates Ruff, Pytest, Docker build, and Render deployment
@@ -470,12 +542,16 @@ Trusted cloud outputs
 
 The platform is designed around clear responsibility boundaries and independently validated interfaces.
 
+- **Candidate-first publishing** prevents incomplete Silver or Gold outputs from replacing trusted published datasets.
+- **Recovery metadata** makes interrupted Batch execution resumable and observable without using the Recovery DB as the business data store.
 - **Raw / Silver / Gold layering** separates source preservation, validated row-level data, and analytics-ready outputs.
 - **Bounded Streaming windows** give Airflow deterministic downstream processing units without pretending continuous Kafka ingestion is a Batch DAG.
 - **Producer delivery acknowledgement + Consumer manual commits** make delivery state explicit.
 - **Redis deduplication** handles replayed events while preserving at-least-once delivery behavior.
 - **Independent Batch and Streaming DAGs** avoid forcing workloads with different lifecycles into one execution path.
+- **Automated Streaming progression** removes manual handoff while preserving one-window-at-a-time lifecycle boundaries.
 - **Athena ↔ Redshift reconciliation** verifies Data Lake and warehouse consistency instead of assuming a successful load proves correctness.
+- **Grouped cross-layer validation** catches business-level mismatches that grand totals alone could miss.
 - **`latest.json`** provides an explicit serving contract for the latest completed Streaming window.
 - **Layered FastAPI architecture** separates routing, caching, service logic, and storage access.
 - **Reusable API contracts** allow React and Power BI to consume the same trusted analytics layer.
@@ -488,6 +564,7 @@ The platform is designed around clear responsibility boundaries and independentl
 | Layer | Technologies |
 | --- | --- |
 | Data processing | Python, Pandas, SQL |
+| Recovery metadata | PostgreSQL |
 | Streaming | Apache Kafka, Redis |
 | Orchestration | Apache Airflow |
 | Cloud storage / query | Amazon S3, Amazon Athena |
@@ -516,8 +593,17 @@ Automated validation is implemented across the component repositories.
 Cross-layer runtime validation additionally verifies:
 
 ```text
-Batch S3 / Athena ↔ Redshift      PASS
-Streaming S3 / Athena ↔ Redshift PASS
+Batch S3 / Athena ↔ Redshift summary validation PASS
+Batch S3 / Athena ↔ Redshift grouped validation PASS
+Streaming S3 / Athena ↔ Redshift                PASS
+```
+
+Final local Airflow integration also verified:
+
+```text
+Batch Pipeline DAG            SUCCESS
+Streaming Pipeline DAG        SUCCESS
+Main Orchestration DAG        SUCCESS
 ```
 
 ---
@@ -615,16 +701,17 @@ This project follows the data lifecycle beyond transformation alone:
 
 ```text
 Data ingestion
-→ Batch and Streaming processing
+→ Recovery-aware Batch processing
+→ Bounded Streaming processing
 → Validation and deduplication
 → Independent orchestration lifecycles
 → Cloud storage and warehouse analytics
-→ Cross-layer reconciliation
+→ Summary + grouped cross-layer reconciliation
 → API serving
 → React and Power BI consumption
 ```
 
-It demonstrates data pipeline development, system design, data quality, reliability trade-offs, orchestration, cloud analytics, API contracts, deployment, testing, and downstream consumption as one connected platform.
+It demonstrates data pipeline development, system design, recovery, data quality, reliability trade-offs, orchestration, cloud analytics, API contracts, deployment, testing, and downstream consumption as one connected platform.
 
 ---
 
@@ -635,11 +722,13 @@ This is not a collection of disconnected tool demos.
 It is a modular data platform in which each component owns a clear responsibility, publishes validated outputs, and contributes to a deployed analytics experience that can be reviewed end to end.
 
 ```text
-Batch ETL
+Recovery-Aware Batch ETL
 +
-Bounded Streaming
+Bounded Streaming Automation
 +
 Airflow Orchestration
++
+PostgreSQL Recovery Metadata
 +
 AWS S3 / Athena / Redshift
 +
@@ -649,3 +738,4 @@ React / Power BI
 =
 Vendor Payments Data Platform
 ```
+
