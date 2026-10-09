@@ -420,7 +420,7 @@ This dual-consumption design allows React and Power BI to reuse the same serving
 | [**vendor-payments-streaming-pipeline**](https://github.com/Chu-Thana/vendor-payments-streaming-pipeline) | Kafka Streaming | bounded windows, Producer, Kafka, Consumer, Redis deduplication, staging, completion markers |
 | [**vendor-payments-airflow-orchestration**](https://github.com/Chu-Thana/vendor-payments-airflow-orchestration) | Workflow orchestration | Batch DAG, automated Streaming DAG, Main Orchestration DAG, execution control |
 | [**vendor-payments-cloud-data-platform**](https://github.com/Chu-Thana/vendor-payments-cloud-data-platform) | AWS cloud analytics | S3, Athena, Redshift Serverless, summary + grouped validation, runtime metadata, `latest.json` |
-| **vendor-payments-database** | Recovery metadata | PostgreSQL pipeline runs, stage execution tracking, chunk recovery state, stale-run recovery |
+| [**vendor-payments-database**](https://github.com/Chu-Thana/vendor-payments-database) | Recovery metadata | PostgreSQL pipeline runs, stage execution tracking, chunk recovery state, stale-run recovery |
 | [**vendor-payments-api-serving**](https://github.com/Chu-Thana/vendor-payments-api-serving) | API serving | FastAPI, repository/service layers, latest-window resolution, caching, Docker, Render |
 | [**data-engineering-platform**](https://github.com/Chu-Thana/data-engineering-platform) | Final analytics platform | React + TypeScript web analytics, Power BI, integrated architecture and portfolio documentation |
 
